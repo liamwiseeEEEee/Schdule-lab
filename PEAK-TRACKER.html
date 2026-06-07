@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="manifest" href="manifest.webmanifest" />
 <meta name="theme-color" content="#05080a" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Liam" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
 <title>Peak · Liam</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -167,14 +170,50 @@ body{ background:var(--bg); color:var(--fg); font-family:var(--ui); -webkit-font
 .segBtn.on{ background:rgba(52,211,153,.14); color:var(--accent2); }
 
 .chartWrap{ position:relative; width:100%; }
-.chartSvg{ width:100%; height:300px; display:block; overflow:visible; touch-action:none; }
+.chartSvg{ position:relative; z-index:1; width:100%; height:300px; display:block; overflow:visible; touch-action:none; }
+/* chart backdrop (ported from Graph Lab: aurora/particles/mountains/stars/grid/dots) */
+.chartBg{ position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; border-radius:var(--radius-sm); }
+.bgk-aurora{ background:radial-gradient(ellipse 60% 55% at 32% 60%, var(--c-soft), transparent 68%),radial-gradient(ellipse 50% 45% at 75% 38%, var(--c-soft), transparent 70%),linear-gradient(135deg,#0a120e 0%,#050806 100%); opacity:.6; }
+.bgk-grid{ background-image:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px); background-size:26px 26px; }
+.bgk-dots{ background-image:radial-gradient(var(--c-soft) 1.1px, transparent 1.4px); background-size:18px 18px; opacity:.5; }
+.bgk-mountains svg{ position:absolute; left:0; right:0; bottom:0; width:100%; height:62%; display:block; opacity:.7; }
+.bgk-particles span{ position:absolute; width:2px; height:2px; border-radius:50%; background:var(--c); box-shadow:0 0 6px var(--c-glow); opacity:0; animation:gp-drift linear infinite; }
+@keyframes gp-drift{ 0%{ transform:translate3d(0,0,0); opacity:0; } 12%{ opacity:.8; } 88%{ opacity:.5; } 100%{ transform:translate3d(var(--dx,10px),var(--dy,-120px),0); opacity:0; } }
+.bgk-stars{ background:radial-gradient(ellipse 90% 70% at 50% -10%, #0a1118, #05070b 78%); }
+.bgk-stars .milky{ position:absolute; left:-20%; right:-20%; top:38%; height:42%; transform:rotate(-18deg); filter:blur(14px); opacity:.5; background:linear-gradient(90deg, transparent, var(--c-soft) 35%, rgba(255,255,255,.10) 50%, var(--c-soft) 65%, transparent); }
+.bgk-stars .star{ position:absolute; border-radius:50%; background:#fff; box-shadow:0 0 4px rgba(255,255,255,.6); animation:twinkle var(--tw,3s) ease-in-out infinite; }
+.bgk-stars .star.tint{ background:var(--c); box-shadow:0 0 5px var(--c-glow); }
+@keyframes twinkle{ 0%,100%{ opacity:.18; } 50%{ opacity:.95; } }
+.bgk-stars .shoot{ position:absolute; width:90px; height:2px; border-radius:2px; opacity:0; background:linear-gradient(90deg, transparent, #fff 60%, var(--c)); box-shadow:0 0 8px var(--c-glow); animation:shoot var(--sd,7s) ease-in infinite; animation-delay:var(--sdelay,0s); }
+@keyframes shoot{ 0%{ opacity:0; transform:translate(0,0) rotate(20deg) scaleX(.2); } 6%{ opacity:1; } 16%{ opacity:1; } 30%{ opacity:0; transform:translate(260px,95px) rotate(20deg) scaleX(1); } 100%{ opacity:0; transform:translate(260px,95px) rotate(20deg) scaleX(1); } }
 .scrubLine{ position:absolute; top:0; bottom:30px; width:1px; background:rgba(255,255,255,.28); pointer-events:none; display:none; }
 .scrubDot{ position:absolute; width:14px; height:14px; border-radius:50%; background:var(--warn); box-shadow:0 0 14px var(--warn),0 0 0 4px rgba(251,191,36,.18); transform:translate(-50%,-50%); pointer-events:none; display:none; }
 .scrubTip{ position:absolute; transform:translate(-50%,-130%); background:var(--panel2); border:1px solid var(--line2); border-radius:10px; padding:8px 12px; pointer-events:none; display:none; white-space:nowrap; backdrop-filter:blur(8px); }
 .scrubTip .v{ font-family:var(--serif); font-style:italic; font-size:18px; color:var(--accent); }
 .scrubTip .l{ font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:1px; }
+.dragTime{ position:absolute; bottom:34px; transform:translateX(-50%); display:none; background:var(--panel2); border:1px solid var(--accent2); border-radius:8px; padding:5px 11px; font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent2); white-space:nowrap; pointer-events:none; z-index:7; box-shadow:0 4px 14px rgba(0,0,0,.55); }
 .sleepMarks{ position:absolute; top:0; left:0; right:0; height:0; pointer-events:none; }
 .sleepMark{ position:absolute; top:-6px; transform:translateX(-50%); font-family:var(--mono); font-size:9px; letter-spacing:.04em; color:var(--muted2); white-space:nowrap; background:var(--panel2); border:1px solid var(--line2); border-radius:7px; padding:3px 8px; }
+.sleepLabels{ position:absolute; inset:0; pointer-events:none; z-index:2; }
+.sleepLbl{ position:absolute; top:8px; transform:translateX(-50%); font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:rgba(110,231,183,.6); white-space:nowrap; }
+.sleepLbl.wake{ color:var(--muted2); }
+.sleepHit{ position:absolute; top:0; bottom:30px; z-index:2; cursor:pointer; }
+.sleepHit:hover{ background:rgba(110,231,183,.05); }
+.sleepEditBtn{ position:absolute; top:50%; transform:translate(-50%,-50%); z-index:6; appearance:none; cursor:pointer; white-space:nowrap; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--accent2); background:var(--panel2); border:1px solid var(--line2); border-radius:9px; padding:8px 12px; box-shadow:0 8px 22px rgba(0,0,0,.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+.sleepEditBtn:hover{ border-color:var(--accent); background:rgba(110,231,183,.12); }
+.sleepEditPop{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:9; width:236px; background:var(--panel2); border:1px solid var(--line2); border-radius:14px; padding:16px 18px; box-shadow:0 20px 55px rgba(0,0,0,.7); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
+.sleepEditTitle{ font-family:var(--serif); font-style:italic; font-size:17px; margin-bottom:13px; }
+.sleepEditRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:11px; font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--muted2); }
+.sleepStep{ display:inline-flex; align-items:center; gap:0; background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.sleepStepB{ appearance:none; cursor:pointer; width:34px; height:34px; border:0; background:none; color:var(--accent2); font-size:20px; line-height:1; display:grid; place-items:center; }
+.sleepStepB:hover{ background:rgba(110,231,183,.14); color:var(--accent); }
+.sleepStepB:active{ background:rgba(110,231,183,.24); }
+.sleepStepV{ min-width:74px; text-align:center; font-family:var(--mono); font-size:13px; color:var(--fg); border-left:1px solid var(--line); border-right:1px solid var(--line); padding:8px 4px; }
+.sleepEditBtns{ display:flex; gap:8px; margin-top:6px; }
+.sleepEditCancel,.sleepEditSaveBtn{ flex:1; appearance:none; cursor:pointer; border-radius:8px; padding:9px; font-family:var(--mono); font-size:11px; letter-spacing:.04em; }
+.sleepEditCancel{ background:none; border:1px solid var(--line); color:var(--muted2); }
+.sleepEditCancel:hover{ color:var(--fg); border-color:var(--line2); }
+.sleepEditSaveBtn{ border:0; font-weight:600; color:#04130c; background:linear-gradient(120deg,var(--accent),var(--accent2)); }
 /* live "now" marker on the graph (ported from Schedule Lab): value bubble + dot + line, plus the bedtime moon */
 .nowline{ position:absolute; top:0; bottom:18px; width:1px; background:rgba(255,255,255,.4); pointer-events:none; z-index:4; }
 .nowdot{ position:absolute; width:13px; height:13px; border-radius:50%; background:#fff; border:2px solid var(--accent2); box-shadow:0 0 14px var(--accent2); transform:translate(-50%,-50%); pointer-events:none; z-index:5; }
@@ -372,7 +411,7 @@ body{ background:var(--bg); color:var(--fg); font-family:var(--ui); -webkit-font
 .schThemeToggle:hover{ color:var(--fg); }
 .schThemeToggle.active{ color:var(--accent2); }
 .schThemeRow{ display:flex; gap:8px; margin-top:10px; }
-.schThemeIn{ flex:1; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:var(--radius-sm); padding:11px 13px; color:var(--fg); font-family:var(--mono); font-size:12px; }
+.schThemeIn{ flex:1; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:var(--radius-sm); padding:11px 13px; color:var(--fg); font-family:var(--mono); font-size:12px; resize:vertical; min-height:40px; line-height:1.45; box-sizing:border-box; }
 .schThemeIn:focus{ outline:none; border-color:var(--accent); }
 .schThemeApply{ appearance:none; cursor:pointer; padding:0 16px; border:1px solid var(--accent); border-radius:var(--radius-sm); font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--accent2); background:rgba(110,231,183,.08); }
 .schThemeHint{ margin-top:7px; font-family:var(--mono); font-size:10px; color:var(--muted); }
@@ -442,7 +481,6 @@ body{ background:var(--bg); color:var(--fg); font-family:var(--ui); -webkit-font
 </main>
 <div id="modalRoot"></div>
 
-<!-- standalone build: no cloud sync. All data stays on this device (localStorage). -->
 <script>
 /* ============================================================
  * PEAK TRACKER — one place for all vitals.
@@ -451,6 +489,83 @@ body{ background:var(--bg); color:var(--fg); font-family:var(--ui); -webkit-font
  * we build a daily "overall" score and an hour-by-hour energy curve.
  * All scores reuse the suite's real calculation logic.
  * ============================================================ */
+/* ============================================================
+ * PEAK_BG — 10 self-contained, CSS-animated dashboard backgrounds.
+ * Shared by Graph Lab (live previews + copy code) and Peak (apply).
+ * A theme code carries {bgAnim:'<id>'}; PEAK_BG.apply(id) paints it
+ * behind everything; PEAK_BG.preview(el,id) renders a tile preview.
+ * ============================================================ */
+window.PEAK_BG = (function(){
+  var CSS = ""
+  + "#peakBg{position:fixed;inset:0;z-index:-3;pointer-events:none;background:#000}#peakBg::after{content:'';position:absolute;inset:0;z-index:1;background:radial-gradient(135% 105% at 50% 0%,rgba(2,4,9,.34),rgba(2,4,9,.70))}#peakBg>*{z-index:0}"
+  + "body.pbgOn .page::before{background:none!important}body.pbgOn{background:#04060a}"
+  + ".pbgBase{overflow:hidden;background:#04060a}.pbgBase>*{position:absolute;inset:-25%;will-change:transform,opacity,filter}"
+  // 1 aurora
+  + ".bg-aurora .a{background:radial-gradient(40% 50% at 28% 32%,rgba(110,231,183,.55),transparent 62%),radial-gradient(42% 52% at 72% 40%,rgba(124,58,237,.5),transparent 62%),radial-gradient(46% 48% at 50% 74%,rgba(34,211,238,.45),transparent 62%);filter:blur(55px);animation:pAur 17s ease-in-out infinite alternate}"
+  + "@keyframes pAur{0%{transform:translate(-6%,-4%) rotate(0deg) scale(1.05)}100%{transform:translate(7%,6%) rotate(10deg) scale(1.2)}}"
+  // 2 starfield
+  + ".bg-stars{background:radial-gradient(circle at 50% 40%,#0a1230,#02040a 70%)}"
+  + ".bg-stars .s{background-image:radial-gradient(1.4px 1.4px at 12% 22%,#fff,transparent),radial-gradient(1.2px 1.2px at 32% 67%,#cfe,transparent),radial-gradient(1.6px 1.6px at 58% 18%,#fff,transparent),radial-gradient(1px 1px at 72% 52%,#9cf,transparent),radial-gradient(1.5px 1.5px at 85% 78%,#fff,transparent),radial-gradient(1px 1px at 45% 88%,#fff,transparent),radial-gradient(1.3px 1.3px at 8% 80%,#fff,transparent),radial-gradient(1px 1px at 92% 30%,#ffd,transparent);background-size:cover;animation:pTwk 4s ease-in-out infinite alternate}"
+  + ".bg-stars .s2{background-image:radial-gradient(1px 1px at 22% 42%,#fff,transparent),radial-gradient(1px 1px at 64% 72%,#fff,transparent),radial-gradient(1px 1px at 78% 12%,#fff,transparent),radial-gradient(1px 1px at 38% 28%,#bdf,transparent);animation:pDrift 40s linear infinite}"
+  + "@keyframes pTwk{0%{opacity:.45}100%{opacity:1}}@keyframes pDrift{0%{transform:translateY(0)}100%{transform:translateY(14%)}}"
+  // 3 nebula
+  + ".bg-nebula .n{background:radial-gradient(35% 35% at 30% 35%,rgba(168,85,247,.5),transparent 60%),radial-gradient(30% 40% at 68% 30%,rgba(236,72,153,.45),transparent 60%),radial-gradient(40% 40% at 55% 72%,rgba(34,211,238,.4),transparent 60%);filter:blur(45px) saturate(1.3);animation:pNeb 30s linear infinite}"
+  + "@keyframes pNeb{0%{transform:rotate(0deg) scale(1.2)}100%{transform:rotate(360deg) scale(1.2)}}"
+  // 4 synthwave grid
+  + ".bg-grid{background:linear-gradient(180deg,#1a0530 0%,#06010f 55%)}"
+  + ".bg-grid .g{inset:0;top:55%;background-image:linear-gradient(rgba(236,72,153,.55) 2px,transparent 2px),linear-gradient(90deg,rgba(34,211,238,.45) 2px,transparent 2px);background-size:48px 48px;transform:perspective(340px) rotateX(68deg);transform-origin:center top;animation:pGrid 1.6s linear infinite}"
+  + ".bg-grid .sun{inset:auto;left:50%;top:20%;width:240px;height:240px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,#fbbf24,#f97316 55%,transparent 70%);filter:blur(2px);opacity:.85}"
+  + "@keyframes pGrid{0%{background-position:0 0}100%{background-position:0 48px}}"
+  // 5 plasma
+  + ".bg-plasma .p{background:radial-gradient(30% 30% at 25% 30%,#22d3ee,transparent 60%),radial-gradient(30% 30% at 75% 35%,#a855f7,transparent 60%),radial-gradient(35% 35% at 50% 75%,#ec4899,transparent 60%),radial-gradient(30% 30% at 20% 80%,#6ee7b7,transparent 60%);filter:blur(50px);mix-blend-mode:screen;animation:pPlas 14s ease-in-out infinite alternate,pHue 22s linear infinite}"
+  + "@keyframes pPlas{0%{transform:translate(-6%,-5%) scale(1.1)}100%{transform:translate(7%,6%) scale(1.35)}}@keyframes pHue{0%{filter:blur(50px) hue-rotate(0deg)}100%{filter:blur(50px) hue-rotate(360deg)}}"
+  // 6 mesh
+  + ".bg-mesh .m{background:radial-gradient(28% 28% at 30% 30%,rgba(52,211,153,.6),transparent 60%),radial-gradient(26% 26% at 70% 40%,rgba(59,130,246,.55),transparent 60%),radial-gradient(30% 30% at 45% 70%,rgba(168,85,247,.5),transparent 60%);filter:blur(40px);animation:pMesh 12s ease-in-out infinite alternate}"
+  + "@keyframes pMesh{0%{transform:translate(-4%,-3%) scale(1.05) rotate(-4deg)}100%{transform:translate(5%,4%) scale(1.25) rotate(6deg)}}"
+  // 7 rain
+  + ".bg-rain{background:linear-gradient(180deg,#0b1220,#04060c)}"
+  + ".bg-rain .r{background-image:repeating-linear-gradient(105deg,transparent 0 16px,rgba(125,211,252,.18) 16px 17px,transparent 17px 30px);animation:pRain .7s linear infinite}"
+  + "@keyframes pRain{0%{transform:translateY(-10%)}100%{transform:translateY(10%)}}"
+  // 8 orbs
+  + ".bg-orbs{background:radial-gradient(circle at 50% 50%,#0a0f1e,#03050b 75%)}"
+  + ".bg-orbs .o{background:radial-gradient(8px 8px at 20% 30%,rgba(110,231,183,.9),transparent 70%),radial-gradient(12px 12px at 70% 55%,rgba(124,58,237,.85),transparent 70%),radial-gradient(6px 6px at 45% 80%,rgba(34,211,238,.9),transparent 70%),radial-gradient(10px 10px at 85% 25%,rgba(236,72,153,.8),transparent 70%);filter:blur(2px) drop-shadow(0 0 14px rgba(110,231,183,.5));animation:pOrb 16s ease-in-out infinite alternate}"
+  + "@keyframes pOrb{0%{transform:translate(-4%,-6%)}100%{transform:translate(6%,5%)}}"
+  // 9 waves
+  + ".bg-waves{background:linear-gradient(180deg,#021018,#030a12)}"
+  + ".bg-waves .w{background:repeating-linear-gradient(180deg,transparent 0 38px,rgba(45,212,191,.10) 38px 40px);animation:pWave 7s ease-in-out infinite alternate}"
+  + ".bg-waves .w2{background:radial-gradient(60% 30% at 50% 60%,rgba(34,211,238,.25),transparent 70%);filter:blur(30px);animation:pWave2 9s ease-in-out infinite alternate}"
+  + "@keyframes pWave{0%{transform:translateY(-3%) skewY(-2deg)}100%{transform:translateY(3%) skewY(2deg)}}@keyframes pWave2{0%{transform:translate(-6%,2%)}100%{transform:translate(6%,-2%)}}"
+  // 10 embers
+  + ".bg-embers{background:radial-gradient(circle at 50% 120%,#3a1206,#0a0402 70%)}"
+  + ".bg-embers .e{background-image:radial-gradient(2px 2px at 20% 90%,#fbbf24,transparent),radial-gradient(2px 2px at 40% 95%,#f97316,transparent),radial-gradient(1.5px 1.5px at 60% 92%,#fb7185,transparent),radial-gradient(2px 2px at 80% 96%,#fbbf24,transparent),radial-gradient(1.5px 1.5px at 30% 88%,#f59e0b,transparent),radial-gradient(2px 2px at 70% 85%,#f97316,transparent);animation:pEmb 6s linear infinite}"
+  + "@keyframes pEmb{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(-120%);opacity:0}}"
+  + ".bg-mountains{background:radial-gradient(120% 85% at 50% -10%,#0b1626,#03060d 60%)}"
+  + ".bg-mountains .au{background:radial-gradient(55% 40% at 50% 14%,rgba(110,231,183,.22),transparent 62%);filter:blur(34px);animation:pAur 20s ease-in-out infinite alternate}"
+  + ".bg-mountains .s{background-image:radial-gradient(1.4px 1.4px at 14% 20%,#fff,transparent),radial-gradient(1.2px 1.2px at 34% 30%,#cfe,transparent),radial-gradient(1.5px 1.5px at 58% 16%,#fff,transparent),radial-gradient(1px 1px at 72% 26%,#9cf,transparent),radial-gradient(1.4px 1.4px at 86% 22%,#fff,transparent),radial-gradient(1px 1px at 46% 12%,#fff,transparent),radial-gradient(1.2px 1.2px at 22% 40%,#fff,transparent),radial-gradient(1px 1px at 92% 36%,#ffd,transparent);animation:pTwk 4s ease-in-out infinite alternate}"
+  + ".bg-mountains .mt{inset:auto 0 0 0;height:50%}.bg-mountains .mt svg{width:100%;height:100%;display:block}";
+  var LIST = [
+    {id:'aurora', name:'Aurora',     html:'<div class="a"></div>'},
+    {id:'stars',  name:'Starfield',  html:'<div class="s"></div><div class="s2"></div>'},
+    {id:'nebula', name:'Nebula',     html:'<div class="n"></div>'},
+    {id:'grid',   name:'Synthwave',  html:'<div class="sun"></div><div class="g"></div>'},
+    {id:'plasma', name:'Plasma',     html:'<div class="p"></div>'},
+    {id:'mesh',   name:'Mesh',       html:'<div class="m"></div>'},
+    {id:'rain',   name:'Rain',       html:'<div class="r"></div>'},
+    {id:'orbs',   name:'Orbs',       html:'<div class="o"></div>'},
+    {id:'waves',  name:'Waves',      html:'<div class="w"></div><div class="w2"></div>'},
+    {id:'embers', name:'Embers',     html:'<div class="e"></div>'},
+    {id:'mountains', name:'Mountains', html:'<div class="au"></div><div class="s"></div><div class="mt"><svg viewBox="0 0 1600 420" preserveAspectRatio="none"><defs><linearGradient id="mtf" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0d1a17" stop-opacity="0"/><stop offset="55%" stop-color="#0d1a17" stop-opacity=".55"/><stop offset="100%" stop-color="#0d1a17" stop-opacity=".95"/></linearGradient><linearGradient id="mtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#050a09" stop-opacity=".4"/><stop offset="60%" stop-color="#050a09" stop-opacity=".95"/><stop offset="100%" stop-color="#050a09" stop-opacity="1"/></linearGradient></defs><path d="M0,300 L120,230 L210,260 L320,180 L430,220 L560,150 L680,210 L820,170 L960,220 L1100,180 L1240,240 L1380,200 L1500,250 L1600,220 L1600,420 L0,420 Z" fill="url(#mtf)"/><path d="M0,360 L100,320 L220,340 L340,290 L460,330 L590,300 L720,340 L860,310 L1000,350 L1140,310 L1280,355 L1420,320 L1540,360 L1600,340 L1600,420 L0,420 Z" fill="url(#mtn)"/></svg></div>'}
+  ];
+  function ensureCss(){ if(document.getElementById('peakBgCss'))return; var s=document.createElement('style'); s.id='peakBgCss'; s.textContent=CSS; document.head.appendChild(s); }
+  function def(id){ for(var i=0;i<LIST.length;i++) if(LIST[i].id===id) return LIST[i]; return null; }
+  function apply(id){ ensureCss(); var el=document.getElementById('peakBg'); var d=def(id);
+    if(!d){ if(el)el.parentNode.removeChild(el); if(document.body)document.body.classList.remove('pbgOn'); return; }
+    if(!el){ el=document.createElement('div'); el.id='peakBg'; document.body.appendChild(el); }
+    el.className='pbgBase bg-'+d.id; el.innerHTML=d.html; if(document.body)document.body.classList.add('pbgOn'); }
+  function preview(container,id){ ensureCss(); var d=def(id); container.className='pbgPrev pbgBase bg-'+id; container.innerHTML=d?d.html:''; }
+  return { CSS:CSS, LIST:LIST, apply:apply, preview:preview, def:def };
+})();
+
 function readLS(k){ try{ const r=localStorage.getItem(k); return r?JSON.parse(r):null; }catch(e){ return null; } }
 // per-render caches (the energy curve reads these hundreds of times) — cleared at the top of render()
 let _hl,_prof,_stim,_feelC,_med,_recHist,_hrvB,_rhrB,_sdebt,_smoker,_hab,_chrono;
@@ -614,7 +729,7 @@ function medCardHtml(){
     + searchBlock
     + medLogsHtml()
     +'<div class="cafTip"><span class="cafTipIcon">'+tip.icon+'</span><span class="cafTipTxt">'+tip.txt+'</span></div>'
-    +''
+    +'<a class="trackLink" href="meds.html">Open Meds tracker →</a>'
     +'</div>';
 }
 function medLogsHtml(){ const logs=medTodayLogs(); if(!logs.length)return ''; return '<div class="cafLogsHead"><span class="cafLogsLab">Today’s doses</span><button class="cafClear" data-clearmed="1">clear all</button></div><div class="cafLogs">'+logs.map(l=>'<span class="cafLog"><b>'+esc(l.name)+'</b> '+Math.round(l.mg)+'mg · '+fmtClockMs(l.t)+'<span class="cafLogX" data-rmmed="'+esc(l.id||'')+'" title="Remove">×</span></span>').join('')+'</div>'; }
@@ -629,7 +744,7 @@ function waterCardHtml(){
     +'<div class="cafChips"><button class="cafChip" data-water="1"><span class="cafChipName">+1 glass</span><span class="cafChipMg">~250 ml</span></button>'
     +'<button class="cafChip" data-water="2"><span class="cafChipName">+2 glasses</span><span class="cafChipMg">~500 ml</span></button>'
     +(c>0?'<button class="cafChip" data-water="-1"><span class="cafChipName">− undo</span><span class="cafChipMg">last glass</span></button>':'')+'</div>'
-    +'</div>';
+    +'<a class="trackLink" href="water.html">Open Water tracker →</a></div>';
 }
 
 /* ---- compact Supplements card (tap to mark taken; syncs supplements_standalone_v1) ---- */
@@ -639,14 +754,14 @@ function suppTakenMap(){ const s=readLS('supplements_standalone_v1'); return (s&
 function toggleSupp(id){ const s=readLS('supplements_standalone_v1')||{items:[],taken:{}}; if(!s.taken)s.taken={}; const k=suppDateKey(); const day=Object.assign({},s.taken[k]||{}); if(day[id])delete day[id]; else day[id]=true; s.taken[k]=day; try{ localStorage.setItem('supplements_standalone_v1',JSON.stringify(s)); }catch(e){} render(); }
 function suppCardHtml(){
   const items=suppItems();
-  if(!items.length) return '<div class="card cafCard"><div class="cafHero"><div class="cafHeroV" style="font-size:20px">No stack yet</div><div class="cafCeil">supplements</div></div></div>';
+  if(!items.length) return '<div class="card cafCard"><div class="cafHero"><div class="cafHeroV" style="font-size:20px">No stack yet</div><div class="cafCeil">supplements</div></div><a class="trackLink" href="supplements.html">Set up Supplements →</a></div>';
   const tk=suppTakenMap(); const taken=items.filter(i=>tk[i.id]).length;
   const chips=items.map(i=>'<button class="cafChip'+(tk[i.id]?' suppOn':'')+'" data-supp="'+esc(i.id)+'"><span class="cafChipName">'+(tk[i.id]?'✓ ':'')+esc(i.name)+'</span></button>').join('');
   return '<div class="card cafCard">'
     +'<div class="cafHero"><div class="cafHeroV">'+taken+'<small> / '+items.length+' taken</small></div><div class="cafCeil">tap to log</div></div>'
     +'<div class="cafBar"><div class="cafBarFill" style="width:'+Math.round(taken/items.length*100)+'%"></div></div>'
     +'<div class="cafChips">'+chips+'</div>'
-    +'</div>';
+    +'<a class="trackLink" href="supplements.html">Open Supplements →</a></div>';
 }
 
 /* ---- profile stats for the header ticker ---- */
@@ -663,6 +778,9 @@ function parseHM(s){ if(!s)return null; const m=String(s).match(/(\d{1,2}):(\d{2
 function wakeBed(){ const h=health(); let wake=parseHM(h&&h.wakeTime), bed=parseHM(h&&h.bedtime);
   if(wake==null||bed==null){ const hw=histWakeBed(); if(wake==null)wake=hw.wake; if(bed==null)bed=hw.bed; } // your real chronotype
   if(wake==null)wake=7; if(bed==null)bed=23; return {wake,bed}; }
+/* do we have a REAL wake/bed time from vitals (manual / Apple) or your history?
+ * Whoop gives sleep duration but not a wake clock-time, so that alone isn't enough. */
+function hasWakeBedData(){ const h=health(); if(h&&(h.wakeTime||h.bedtime))return true; const hw=histWakeBed(); return hw.wake!=null||hw.bed!=null; }
 function clockOf(t){ t=((t%24)+24)%24; let hh=Math.floor(t); const mm=Math.round((t-hh)*60); let m2=mm; if(m2===60){hh+=1;m2=0;} const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+(m2?':'+String(m2).padStart(2,'0'):'')+' '+ap; }
 function nowT(){ const d=new Date(); return d.getHours()+d.getMinutes()/60; }
 function tToMs(t){ const d=new Date(); d.setHours(0,0,0,0); return d.getTime()+t*3600000; }
@@ -760,23 +878,40 @@ function buildCurve(){ const a=[]; for(let t=0;t<=24;t+=0.5){ const v=energyAt(t
 function peakOf(curve){ const {wake,bed}=wakeBed(); let best=curve[0]; for(const p of curve){ const inDay=bed>wake?(p.t>=wake&&p.t<=bed):(p.t>=wake||p.t<=bed); if(inDay&&p.e>best.e)best=p; } if(best.e<=2){ for(const p of curve)if(p.e>best.e)best=p; } return best; }
 // Optimal sleep window = the bedtime that banks your full sleep target before your wake.
 function optimalSleep(){ const h=health(); const wake=wakeBed().wake; const need=(h&&typeof h.sleepTargetHours==='number')?h.sleepTargetHours:8; const bed=((wake-need)%24+24)%24; return {bed:Math.round(bed*4)/4, wake:Math.round(wake*4)/4, need}; }
+/* the sleep window we DRAW: wake comes from vitals (the past), but bedtime is
+ * YOUR choice — use it when you've set one, else fall back to the recommended bed. */
+function planSleep(){ const h=health(); const wake=wakeBed().wake; const bedH=(h&&h.bedtime)?parseHM(h.bedtime):null;
+  const bed=(bedH!=null)?bedH:optimalSleep().bed; return {wake:Math.round(wake*4)/4, bed:Math.round(bed*4)/4}; }
+function floatTo24(t){ t=((t%24)+24)%24; let H=Math.floor(t), M=Math.round((t-H)*60); if(M===60){H++;M=0;} return String(H%24).padStart(2,'0')+':'+String(M).padStart(2,'0'); }
+let sleepEditOpen=false, sleepEditWake=6.75, sleepEditBed=22.75;
+/* inline editor that pops on the graph — big tap targets, no native picker.
+ * −/+ nudge by 15 min; the display updates instantly without a re-render. */
+function sleepEditPopHtml(){ if(!sleepEditOpen)return '';
+  const row=(key,label,val)=>'<div class="sleepEditRow"><span>'+label+'</span><div class="sleepStep">'
+      +'<button class="sleepStepB" data-sleepadj="'+key+':-1">–</button>'
+      +'<span class="sleepStepV" id="sleep'+key+'Disp">'+clockOf(val)+'</span>'
+      +'<button class="sleepStepB" data-sleepadj="'+key+':1">+</button></div></div>';
+  return '<div class="sleepEditPop" id="sleepEditPop">'
+    +'<div class="sleepEditTitle">Your sleep</div>'
+    +row('Wake','I woke up at', sleepEditWake)
+    +row('Bed','I’ll sleep at', sleepEditBed)
+    +'<div class="sleepEditBtns"><button class="sleepEditCancel" data-sleepcancel="1">Cancel</button><button class="sleepEditSaveBtn" data-sleepsave="1">Save</button></div>'
+    +'</div>'; }
+function openSleepEdit(){ const ps=planSleep(); sleepEditWake=ps.wake; sleepEditBed=ps.bed; sleepEditOpen=true; render(); }
+function saveSleepTimes(wakeHM, bedHM){ const h=health()||{source:'manual',connected:true}; const n=Object.assign({},h);
+  if(wakeHM)n.wakeTime=wakeHM; if(bedHM)n.bedtime=bedHM; n.connected=true; n.ts=Date.now(); saveHealth(n); _hl=undefined; sleepEditOpen=false; render(); }
 
 /* ============================================================
  * Schedule — natural-language tasks mapped onto the peak curve
  * ============================================================ */
-const SCHED='peak_schedule_sa_v1'; let planOpen=false;  // standalone uses its OWN key so it never reads the main app's polluted schedule (localStorage is shared per-domain)
+const SCHED='peak_schedule_v1'; let planOpen=false;
 /* Baked schedule shipped from Schedule Lab — the day's template. SCHED_SEED is
  * bumped every time a new schedule is shipped, so a fresh ship overrides any
  * stale saved tasks once (the file is the source of truth, like the style),
  * while still letting you add/drag/edit in Peak afterwards (your edits save
  * under today's key with the current seed and win until the next day or ship). */
-const SCHED_SEED='lab-2026-06-07i';
-const DEFAULT_SCHED=[
-  { id:'t1', label:'Morning',   start:6,    end:8,    durH:2,   color:'#6EE7B7', icon:'☀', diff:'easy', locked:true,  explicit:true, gap:false },
-  { id:'t2', label:'Claude',    start:9,    end:11.5, durH:2.5, color:'#A78BFA', icon:'✦', diff:'med',  locked:false, explicit:true, gap:false },
-  { id:'t3', label:'Homework',  start:13,   end:15.5, durH:2.5, color:'#F59E0B', icon:'✎', diff:'hard', locked:false, explicit:true, gap:false },
-  { id:'t4', label:'Wind down', start:21.5, end:23,   durH:1.5, color:'#38BDF8', icon:'☾', diff:'easy', locked:true,  explicit:true, gap:false }
-];
+const SCHED_SEED='lab-2026-06-07T-SCRIM';
+const DEFAULT_SCHED=[];
 /* one-time cleanup: physically drop a schedule saved by an older build (seed
  * mismatch) so stale/overlapping tasks can't linger in localStorage. */
 try{ const _r=readLS(SCHED); if(_r&&_r.seed!==SCHED_SEED){ localStorage.removeItem(SCHED); } }catch(e){}
@@ -792,20 +927,21 @@ try{ if(localStorage.getItem('peak_sched_nuked')!==SCHED_NUKE){ localStorage.rem
  * the instant it's read (and persists clean on the next save). */
 function sanitizeSched(tasks){ if(!Array.isArray(tasks))return tasks;
   const fixed=tasks.filter(t=>t&&!t.gap), gaps=tasks.filter(t=>t&&t.gap);
-  const isLocked=t=>(t.locked!=null?!!t.locked:!!t.explicit) && t.start!=null;
-  const placed=[], result=[]; const wake=wakeBed().wake;
+  const placed=[], result=[];
   const overlaps=(s,e)=>placed.some(p=>s<p.end-1e-6 && e>p.start+1e-6);
-  fixed.filter(isLocked).sort((a,b)=>a.start-b.start).forEach(t=>{ placed.push({start:t.start,end:t.end}); result.push(t); });
-  fixed.filter(t=>!isLocked(t)).sort((a,b)=>((a.start==null?1e9:a.start)-(b.start==null?1e9:b.start))).forEach(t=>{
+  // Every task keeps the EXACT time you typed. The only adjustment: if two tasks would
+  // occupy the same slot, the later one is nudged to the next free gap so they can't
+  // hide behind each other. No auto-placement, no dawn floor.
+  fixed.slice().sort((a,b)=>((a.start==null?1e9:a.start)-(b.start==null?1e9:b.start))).forEach(t=>{
     const dur=taskDur(t); let s=t.start;
-    if(s==null||overlaps(s,s+dur)){ s=snapFree(s==null?wake:s, dur, placed); }
+    if(s==null||overlaps(s,s+dur)){ s=snapFree(s==null?wakeBed().wake:s, dur, placed); }
     t.start=s; t.end=Math.min(24,s+dur); t.durH=t.end-t.start;
     placed.push({start:t.start,end:t.end}); result.push(t);
   });
   return result.concat(gaps).sort((a,b)=>((a.start==null?1e9:a.start)-(b.start==null?1e9:b.start))); }
 function loadSched(){ const r=readLS(SCHED); const tasks=(r&&r.seed===SCHED_SEED&&r.day===dKey()&&Array.isArray(r.tasks))?r.tasks:DEFAULT_SCHED.map(t=>Object.assign({},t)); return sanitizeSched(tasks); }
 function saveSched(tasks){ try{ localStorage.setItem(SCHED,JSON.stringify({day:dKey(),seed:SCHED_SEED,tasks})); }catch(e){} if(window.PatronDB&&PatronDB.isCloud())PatronDB.set('peaksched',{day:dKey(),seed:SCHED_SEED,tasks}); render(); }
-function diffOf(s){ if(/\b(hard|intense|deep|heavy|max|pr|grind)\b/i.test(s))return 'hard'; if(/\b(easy|chill|light|admin|rest|relax|recover)\b/i.test(s))return 'easy'; return 'med'; }
+function diffOf(s){ if(/\b(high|hard|intense|deep|heavy|max|pr|grind)\b/i.test(s))return 'hard'; if(/\b(low|easy|chill|light|admin|rest|relax|recover)\b/i.test(s))return 'easy'; return 'med'; }
 /* ----------------------------------------------------------------------
  * Schedule visual style — the "model" you design in Schedule Lab.
  * SCHED_STYLE_DEFAULT is the SINGLE SOURCE OF TRUTH: whatever the Lab is set
@@ -823,21 +959,51 @@ try{ localStorage.removeItem('peak_sched_style_v1'); }catch(e){}
  * theme (peak_theme_v1) is an explicit, user-chosen OVERRIDE that wins until
  * they reset. (Different from the old auto Send-to-Peak key we still nuke.) */
 const PEAK_THEME='peak_theme_v1';
-function loadTheme(){ try{ const t=JSON.parse(localStorage.getItem(PEAK_THEME)||'null'); return (t&&(t.style||t.bg))?t:null; }catch(e){ return null; } }
+function loadTheme(){ try{ const t=JSON.parse(localStorage.getItem(PEAK_THEME)||'null'); return (t&&(t.style||t.bg||t.graph||t.bgAnim))?t:null; }catch(e){ return null; } }
+/* the energy-curve look — defaults to the shipped "stepped area" design; a pasted
+ * Graph Lab code (lab:'graph') overrides any of: color, line, glow, variant, height-color. */
+function graphStyle(){ const t=loadTheme(); const g=(t&&t.graph)||{};
+  return { color:(typeof g.color==='string'&&g.color)?g.color:'#E9EFE9', line:(g.line!=null?+g.line:3), glow:(g.glow!==false), variant:String(g.variant||'stepped area').toLowerCase(), heightColor:(g.heightColor!=null?!!g.heightColor:true), hiC:g.hiC||'#6EE7B7', loC:g.loC||'#EF4444', backdrop:String(g.backdrop||'none').toLowerCase() }; }
 function schedStyle(){ const t=loadTheme(); const s=Object.assign({},SCHED_STYLE_DEFAULT,(t&&t.style)||{}); s.diff=Object.assign({},SCHED_STYLE_DEFAULT.diff,(t&&t.style&&t.style.diff)||{}); return s; }
 function graphColor(){ const c=schedStyle().acc; return (typeof c==='string'&&c)?c:'#34D399'; }   // the energy-curve line/area/dot color = the theme accent
-function applyThemeBg(){ const t=loadTheme(); const r=document.documentElement; if(t&&t.bg){ r.style.setProperty('--bg',t.bg); } else { r.style.removeProperty('--bg'); } }
+function applyThemeBg(){ const t=loadTheme(); const r=document.documentElement; if(t&&t.bg){ r.style.setProperty('--bg',t.bg); } else { r.style.removeProperty('--bg'); } if(window.PEAK_BG){ PEAK_BG.apply(t&&t.bgAnim); } }
 /* PEAK-THEME:<base64 json> → {style, bg, tasks?}. Returns true on success. */
+function normGraph(c){ return { color:c.color||null, line:(c.line!=null?+c.line:null), glow:(c.glow!==false), variant:c.variant||c.animate||'line', heightColor:!!c.heightColor, hiC:c.hiC||null, loC:c.loC||null, backdrop:c.backdrop||c.bg||'none' }; }
+/* the chart backdrop (Graph Lab "BACKDROP": aurora/particles/mountains/stars/grid/dots),
+ * tinted to the graph color. Cached per (type|color) so stars don't reshuffle each render. */
+const MOUNTAIN_SVG='<svg viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M0,210 L90,160 L170,185 L260,120 L350,160 L470,100 L580,150 L700,110 L820,160 L920,120 L1000,150 L1000,300 L0,300 Z" fill="var(--c-soft)" opacity=".5"/><path d="M0,250 L110,215 L230,240 L350,200 L470,235 L600,205 L720,240 L850,210 L1000,245 L1000,300 L0,300 Z" fill="var(--c)" opacity=".22"/></svg>';
+let _chartBgCache={key:null,html:''};
+function chartBackdropHtml(){ const g=graphStyle(); const bd=g.backdrop; if(!bd||bd==='none')return '';
+  const key=bd+'|'+g.color; if(_chartBgCache.key===key)return _chartBgCache.html;
+  const c=g.color, soft=toRGBA(c,.35), glow=toRGBA(c,.6); let inner='';
+  if(bd==='mountains') inner=MOUNTAIN_SVG;
+  else if(bd==='particles'){ for(let i=0;i<16;i++){ const dur=8+Math.random()*10; inner+='<span style="left:'+(Math.random()*100).toFixed(1)+'%;top:'+(55+Math.random()*45).toFixed(1)+'%;animation-duration:'+dur.toFixed(1)+'s;animation-delay:'+(-Math.random()*dur).toFixed(1)+'s;--dx:'+(Math.random()*40-20).toFixed(0)+'px;--dy:'+(-(60+Math.random()*80)).toFixed(0)+'px"></span>'; } }
+  else if(bd==='stars'){ inner='<span class="milky"></span>'; for(let i=0;i<64;i++){ const sz=(0.8+Math.random()*1.8).toFixed(2); inner+='<span class="star'+(Math.random()<0.3?' tint':'')+'" style="width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;--tw:'+(2+Math.random()*4).toFixed(1)+'s;animation-delay:'+(-Math.random()*5).toFixed(1)+'s"></span>'; } for(let j=0;j<3;j++){ inner+='<span class="shoot" style="left:'+(-5+Math.random()*45).toFixed(1)+'%;top:'+(3+Math.random()*40).toFixed(1)+'%;--sd:'+(6+Math.random()*4).toFixed(1)+'s;--sdelay:'+(j*3+Math.random()*4).toFixed(1)+'s"></span>'; } }
+  const html='<div class="chartBg bgk-'+bd+'" style="--c:'+c+';--c-soft:'+soft+';--c-glow:'+glow+'">'+inner+'</div>';
+  _chartBgCache={key,html}; return html; }
 function importThemeCode(code){ try{
-    let s=String(code||'').trim().replace(/^PEAK-?THEME:?/i,'').trim(); if(!s)return false;
-    const cfg=JSON.parse(decodeURIComponent(escape(atob(s))));
-    if(!cfg||(!cfg.style&&!cfg.bg&&!cfg.tasks))return false;
-    localStorage.setItem(PEAK_THEME, JSON.stringify({v:1, style:cfg.style||{}, bg:cfg.bg||null}));
-    if(Array.isArray(cfg.tasks)&&cfg.tasks.length && confirm('Also replace your schedule with the creator’s tasks?')){
-      const tasks=cfg.tasks.map(t=>({ id:t.id||('k_'+Math.random().toString(36).slice(2,8)), label:t.label||t.name||'Task', start:t.start, end:t.end, durH:t.durH||((t.end!=null&&t.start!=null)?t.end-t.start:1), color:t.color, icon:t.icon, diff:t.diff||'med', locked:(t.locked!=null?!!t.locked:!!t.explicit), explicit:(t.explicit!=null?!!t.explicit:(t.start!=null)), gap:!!t.gap, size:t.size, rStart:(t.rStart!=null?t.rStart:null), rEnd:(t.rEnd!=null?t.rEnd:null) }));
-      saveSched(tasks);
+    let raw=String(code||'').trim(); if(!raw)return false;
+    // 1) Schedule Lab theme (base64): graph color + background + card style + tasks
+    if(/^PEAK-?THEME:/i.test(raw)){
+      const cfg=JSON.parse(decodeURIComponent(escape(atob(raw.replace(/^PEAK-?THEME:?/i,'').trim()))));
+      if(!cfg||(!cfg.style&&!cfg.bg&&!cfg.tasks&&!cfg.bgAnim))return false;
+      const t=loadTheme()||{v:1}; t.style=cfg.style||{}; t.bg=cfg.bg||null; t.bgAnim=cfg.bgAnim||null; localStorage.setItem(PEAK_THEME, JSON.stringify(t));
+      if(Array.isArray(cfg.tasks)&&cfg.tasks.length && confirm('Also replace your schedule with the creator’s tasks?')){
+        const tasks=cfg.tasks.map(t2=>({ id:t2.id||('k_'+Math.random().toString(36).slice(2,8)), label:t2.label||t2.name||'Task', start:t2.start, end:t2.end, durH:t2.durH||((t2.end!=null&&t2.start!=null)?t2.end-t2.start:1), color:t2.color, icon:t2.icon, diff:t2.diff||'med', locked:(t2.locked!=null?!!t2.locked:!!t2.explicit), explicit:(t2.explicit!=null?!!t2.explicit:(t2.start!=null)), gap:!!t2.gap, size:t2.size, rStart:(t2.rStart!=null?t2.rStart:null), rEnd:(t2.rEnd!=null?t2.rEnd:null) }));
+        saveSched(tasks);
+      }
+      applyThemeBg(); render(); return true;
     }
-    applyThemeBg(); render(); return true;
+    // 2) Graph Lab / Text Lab code: a JSON object (optionally after a plain-English line)
+    const m=raw.match(/\{[\s\S]*\}/);
+    if(m){ const cfg=JSON.parse(m[0]);
+      if(cfg&&cfg.lab==='graph'){ const t=loadTheme()||{v:1}; t.graph=normGraph(cfg);
+        const v=String(cfg.variant||cfg.animate||'').toLowerCase(); chartType=/bars?/.test(v)?'bars':(/stack/.test(v)?'stack':'line');
+        localStorage.setItem(PEAK_THEME, JSON.stringify(t)); render(); return true; }
+      if(cfg&&cfg.lab==='text'){ alert('That’s a Text Lab design (title animations) — it doesn’t style the energy graph.'); return false; }
+      if(cfg&&(cfg.style||cfg.bg)){ const t=loadTheme()||{v:1}; if(cfg.style)t.style=cfg.style; if(cfg.bg!=null)t.bg=cfg.bg; localStorage.setItem(PEAK_THEME, JSON.stringify(t)); applyThemeBg(); render(); return true; }
+    }
+    return false;
   }catch(e){ return false; } }
 function resetTheme(){ try{ localStorage.removeItem(PEAK_THEME); }catch(e){} document.documentElement.style.removeProperty('--bg'); render(); }
 let themeOpen=false;
@@ -868,7 +1034,10 @@ function parseTask(str){
   }
   let start=null,end=null,durH=null,explicit=false;
   let m=s.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:to|till|until|[-–—])\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
-  if(m){ start=pClock(m[1],m[2],m[3]); end=pClock(m[4],m[5],m[6]||m[3]); if(end<=start)end=(end+12<=24)?end+12:start+1; s=s.replace(m[0],' '); explicit=true; durH=end-start; }
+  if(m){ const noAP=!m[3]&&!m[6];   // bare range like "10-2" → daytime: 10am→2pm, never 10pm→2am
+    start=pClock(m[1],m[2],m[3]); end=pClock(m[4],m[5],m[6]||m[3]);
+    if(noAP && start>=1 && start<=5) start+=12;   // "1-3" → 1pm–3pm (nobody schedules 1am); "8-2"/"10-2" stay morning starts
+    if(end<=start)end=(end+12<=24)?end+12:start+1; s=s.replace(m[0],' '); explicit=true; durH=end-start; }
   else {
     let comp=s.match(/\b([01]?\d|2[0-3])([0-5]\d)\b/), one=s.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i), dur=s.match(/\b(\d+(?:\.\d+)?)\s*(h|hrs?|hours?|m|mins?|minutes?|minuets?)\b/i);
     if(one){ start=pClock(one[1],one[2],one[3]); s=s.replace(one[0],' '); explicit=true; }
@@ -876,7 +1045,7 @@ function parseTask(str){
     if(dur){ const n=+dur[1]; durH=/^m/i.test(dur[2])?n/60:n; s=s.replace(dur[0],' '); }
     durH=durH||1; if(explicit){ end=start+durH; }
   }
-  s=s.replace(/\b(hard|intense|deep|heavy|max|pr|grind|easy|chill|light|admin|rest|relax|recover|medium|med|moderate|fill|full|at|from)\b/ig,' ').replace(/\s+/g,' ').trim();
+  s=s.replace(/\b(high|low|mid|hard|intense|deep|heavy|max|pr|grind|easy|chill|light|admin|rest|relax|recover|medium|med|moderate|fill|full|at|from)\b/ig,' ').replace(/[,;]/g,' ').replace(/\s+/g,' ').trim();
   return {id:'k_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),label:(s||'Task'),diff,color:diffColor(diff),durH:durH||1,explicit,locked:explicit,start,end,fill:fillFlag};
 }
 function taskDur(t){ return (t&&t.durH&&t.durH>0)?t.durH:((t&&t.start!=null&&t.end!=null)?Math.max(0.25,t.end-t.start):1); }
@@ -918,9 +1087,10 @@ function dawnFloor(){ const {wake,bed}=wakeBed();
   for(let t=wake;t<=hardCap;t+=0.25){ if(energyAt(t).base>=thresh) return Math.max(soft,t); }
   return Math.min(soft,hardCap); }
 function bestSlot(list,durH,diff){ durH=Math.max(0.25,durH||1); const {wake,bed}=wakeBed();
-  const score=avg=> diff==='hard'?avg : diff==='easy'?(100-avg) : (100-Math.abs(avg-65));
+  let _ms=0,_mn=0; for(let _t=wake;_t<=bed;_t+=0.25){ _ms+=energyAt(_t).base; _mn++; } const mean=_ms/(_mn||1);
+  const score=avg=> diff==='hard'?avg : diff==='easy'?(100-avg) : (100-Math.abs(avg-mean));
   function scan(lb){ let best=null,bestScore=-1e9;
-    freeGaps(list).forEach(g=>{ const lo=Math.max(g[0],lb); for(let st=lo; st+durH<=g[1]+1e-6; st+=0.25){ let sum=0,n=0; for(let t=st;t<st+durH;t+=0.25){ sum+=energyAt(t).e; n++; } const sc=score(sum/(n||1)); if(sc>bestScore){ bestScore=sc; best=st; } } });
+    freeGaps(list).forEach(g=>{ const lo=Math.max(g[0],lb); for(let st=lo; st+durH<=g[1]+1e-6; st+=0.25){ let sum=0,n=0; for(let t=st;t<st+durH;t+=0.25){ sum+=energyAt(t).base; n++; } const sc=score(sum/(n||1)); if(sc>=bestScore){ bestScore=sc; best=st; } } });
     return best; }
   let best=scan(dawnFloor()); if(best==null)best=scan(wake);  // honour the dawn floor, else relax it
   if(best==null){ best=list.length?Math.min(bed-durH,Math.max.apply(null,list.map(x=>x.end))):wake; best=Math.max(wake,Math.min(best,bed-durH)); }
@@ -945,6 +1115,17 @@ function snapFree(desired,dur,others){
   fit.forEach(g=>{ const s=clamp(desired,g[0],g[1]-dur); const d=Math.abs(s-desired); if(d<bd){ bd=d; best=s; } });
   return Math.round(best*4)/4;
 }
+/* Free drag placement: snap to the nearest 15-min mark anywhere on the graph (no dawn
+ * floor — you're choosing the time), and if it lands on another task, shift RIGHT to the
+ * next open 15-min slot (then left as a fallback) so nothing ever overlaps. */
+function snapDrag(desired,dur,others){
+  const lo=0, hi=Math.max(0,24-dur); let s=clamp(Math.round(desired*4)/4, lo, hi);
+  const hits=x=>others.some(o=>o.start!=null && x<o.end-1e-6 && x+dur>o.start+1e-6);
+  if(!hits(s)) return s;
+  for(let x=s; x<=hi+1e-6; x+=0.25){ if(!hits(x)) return Math.round(x*4)/4; }
+  for(let x=s; x>=lo-1e-6; x-=0.25){ if(!hits(x)) return Math.round(x*4)/4; }
+  return s;
+}
 /* best-energy start for a task INSIDE an armed window [lo,hi] — same hard→peak /
  * easy→low / med→mid scoring as bestSlot, but scoped to the window and skipping
  * any sub-range already taken by another task. null = nothing of length dur fits. */
@@ -962,12 +1143,15 @@ function placeInWindow(p,lo,hi,list){ const others=list.filter(x=>x&&!x.gap&&x.s
   const dur=Math.max(0.25,Math.min(taskDur(p),hi-lo));
   let st=bestStartIn(lo,hi,dur,p.diff,others); if(st==null)st=snapFree(lo,dur,others);
   p.start=st; p.end=Math.min(24,st+dur); p.durH=p.end-p.start; p.explicit=true; return p; }
-function addSched(str, win){ if(!str||!str.trim())return; const tasks=loadSched(); str.split(/,|;|\band\b/i).forEach(pStr=>{ const p=parseTask(pStr); if(!p)return;
-    if(p.gap){ if(win){ p.rStart=win[0]; p.rEnd=win[1]; } tasks.push(p); return; }
-    if(win){ placeInWindow(p, win[0], win[1], tasks.filter(x=>!x.gap)); }
-    else if(!p.explicit||p.start==null){ placeTask(p,tasks.filter(x=>!x.gap)); } else { p.start=((p.start%24)+24)%24; p.end=Math.max(p.start+0.25,Math.min(24,p.end)); }
-    tasks.push(p); });
-  tasks.sort((a,b)=>(a.start==null?99:a.start)-(b.start==null?99:b.start)); saveSched(tasks); }
+function addSched(str, win){ if(!str||!str.trim())return; schErr=''; const tasks=loadSched(); let added=0;
+  // EVERY task must specify a time — no auto-placement, no gap-fills.
+  str.split(/,|;|\band\b/i).forEach(pStr=>{ if(!pStr.trim())return; const p=parseTask(pStr); if(!p)return;
+    if(win){ placeInWindow(p, win[0], win[1], tasks.filter(x=>!x.gap)); tasks.push(p); added++; return; } // a clicked window IS the time
+    if(p.gap || !p.explicit || p.start==null){ schErr='Add a time — e.g. “school 10-2”, “gym 1930 hard”, “study 3-5”.'; return; }
+    p.start=((p.start%24)+24)%24; p.end=Math.max(p.start+0.25,Math.min(24,p.end)); tasks.push(p); added++;
+  });
+  if(added) tasks.sort((a,b)=>(a.start==null?99:a.start)-(b.start==null?99:b.start));
+  saveSched(tasks); }
 function regapTask(id){ const tasks=loadSched(); const t=tasks.find(x=>x.id===id); if(!t||t.gap)return; placeTask(t,tasks.filter(x=>!x.gap&&x.id!==id)); saveSched(tasks); }
 /* workout suggestion from gym history */
 function gymDaysLast7(){ const d=readLS('po_coach_workout_done')||{}; let n=0; for(let i=0;i<7;i++){ const dd=new Date(); dd.setDate(dd.getDate()-i); if(d[dayKey(dd)])n++; } return n; }
@@ -975,7 +1159,7 @@ function addWorkout(durH){ const tasks=loadSched(); const p={id:'k_'+Date.now().
 let workoutOpen=false;
 /* ── armed-window scheduling: click two chips (or a free stretch of the chart)
  * to arm a window, then a typed task fills it. "fill"/"full" = whole gap. ── */
-let schSel=[], schArmWin=null, schPending=null;
+let schSel=[], schArmWin=null, schPending=null, schErr='';
 function schGapWindow(){ if(schArmWin) return {lo:schArmWin.lo,hi:schArmWin.hi,free:true};
   if(schSel.length!==2)return null; const tasks=loadSched(); const a=tasks.find(x=>x.id===schSel[0]), b=tasks.find(x=>x.id===schSel[1]);
   if(!a||!b||a.gap||b.gap||a.start==null||b.start==null)return null; const first=a.start<=b.start?a:b, second=a.start<=b.start?b:a;
@@ -1032,7 +1216,7 @@ function schOverlayHtml(){ const s=schedStyle(); const segs=effectiveSegments();
 // live "now" value bubble + dot + line on the graph, plus the bedtime moon (positions are data-driven; lanes resolved by layoutSchedPills)
 function nowOverlayHtml(){
   const t=nowT(), v=energyAt(t).e, left=(t/24*100), top=(yOf(v)/CH*100);
-  const sp=optimalSleep(), bedLeft=(sp.bed/24*100);
+  const sp=planSleep(), bedLeft=(sp.bed/24*100);
   return '<div class="nowline" style="left:'+left.toFixed(2)+'%"></div>'
     +'<div class="nowbubble" data-nowbubble="1" style="left:'+left.toFixed(2)+'%;top:'+top.toFixed(2)+'%"><b>'+Math.round(v)+'</b><span>'+clockOf(t)+'</span></div>'
     +'<div class="nowdot" style="left:'+left.toFixed(2)+'%;top:'+top.toFixed(2)+'%"></div>'
@@ -1047,8 +1231,8 @@ function bindTaskDrag(){ const wrap=document.getElementById('chartWrap'), svg=do
     e.preventDefault(); const id=el.dataset.taskid; const tasks=loadSched(); const t=tasks.find(x=>x.id===id); if(!t)return;
     if(t.locked!=null?t.locked:t.explicit){ return; } // locked tasks stay put — unlock to drag
     const dur=taskDur(t); const others=tasks.filter(x=>!x.gap&&x.id!==id); const r=svg.getBoundingClientRect(); el.classList.add('dragging'); let ns=t.start; const tm=el.querySelector('.pillTm');
-    function move(ev){ if(ev.cancelable)ev.preventDefault(); const x=clamp(((ev.touches?ev.touches[0].clientX:ev.clientX)-r.left)/r.width,0,1); let st=x*24-dur/2; ns=snapFree(st,dur,others); el.style.left=clamp(((ns+dur/2)/24)*100,7,93)+'%'; if(tm)tm.textContent=fmtRange(ns,ns+dur); }
-    function up(){ document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up); document.removeEventListener('touchmove',move); document.removeEventListener('touchend',up); el.classList.remove('dragging'); t.start=ns; t.end=Math.min(24,ns+dur); t.durH=dur; t.explicit=true; tasks.sort((a,b)=>a.start-b.start); saveSched(tasks); }
+    function move(ev){ if(ev.cancelable)ev.preventDefault(); const x=clamp(((ev.touches?ev.touches[0].clientX:ev.clientX)-r.left)/r.width,0,1); let st=x*24-dur/2; ns=snapDrag(st,dur,others); el.style.left=clamp(((ns+dur/2)/24)*100,7,93)+'%'; if(tm)tm.textContent=fmtRange(ns,ns+dur); const _dt=document.getElementById('dragTime'); if(_dt){ _dt.style.display='block'; _dt.style.left=clamp(((ns+dur/2)/24)*100,6,94)+'%'; _dt.textContent=fmtRange(ns,ns+dur); } }
+    function up(){ document.removeEventListener('pointermove',move); document.removeEventListener('pointerup',up); document.removeEventListener('touchmove',move); document.removeEventListener('touchend',up); el.classList.remove('dragging'); const _dt=document.getElementById('dragTime'); if(_dt)_dt.style.display='none'; t.start=ns; t.end=Math.min(24,ns+dur); t.durH=dur; t.explicit=true; t.locked=false; tasks.sort((a,b)=>a.start-b.start); saveSched(tasks); }
     document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
     document.addEventListener('touchmove',move,{passive:false}); document.addEventListener('touchend',up);
   }); }); }
@@ -1103,12 +1287,11 @@ function scheduleHtml(){
   const _hasTheme=!!loadTheme();
   const themeBlock='<div class="schTheme">'
     +'<button class="schThemeToggle'+(themeOpen?' on':'')+(_hasTheme?' active':'')+'" data-themeimport="1">🎨 '+(_hasTheme?'Creator theme active':'Import a creator theme')+'</button>'
-    +(themeOpen?'<div class="schThemeRow"><input id="themeCode" class="schThemeIn" placeholder="Paste a PEAK-THEME… code" autocomplete="off"><button class="schThemeApply" data-themeapply="1">Apply</button></div>'
-      +'<div class="schThemeHint">A creator shares a code; pasting it sets the graph color, background &amp; card style'+(_hasTheme?' <button class="schThemeReset" data-themereset="1">· reset to default</button>':'')+'</div>':'')
+    +(themeOpen?'<div class="schThemeRow"><textarea id="themeCode" class="schThemeIn" placeholder="Paste a theme or graph code…" rows="2" autocomplete="off"></textarea><button class="schThemeApply" data-themeapply="1">Apply</button></div>'
+      +'<div class="schThemeHint">Paste a Schedule Lab <b>theme code</b> (color, background, cards) or a Graph Lab <b>graph code</b> (bars, stepped, dotted, glow)'+(_hasTheme?' <button class="schThemeReset" data-themereset="1">· reset to default</button>':'')+'</div>':'')
     +'</div>';
-  const input='<div class="schInputRow"><input id="schInput" class="schInput" placeholder="e.g. school 8-2, gym 1930 hard, gap claude" autocomplete="off"><button class="schAdd" data-addsched="1">＋ Add</button></div><div class="schHint">fixed task = give a time (9-11) · “big gap claude” fills your whole free day · “small gap homework” fills only the short windows between tasks · gaps never touch sleep · easy/medium/hard = color <span style="opacity:.6">· build '+SCHED_SEED+'</span></div>'+themeBlock;
-  // workout nudge: you've trained recently but not today
-  const wOut = (!gymLoggedToday() && gymDaysLast7()>=1) ? '<div class="schWorkout"><button class="schWoBtn" data-workout="1">🏋️ You’ve been training — work out today?</button>'+(workoutOpen?'<div class="schWoOpts">'+[['45m',0.75],['1h',1],['1h 30m',1.5],['2h',2]].map(o=>'<button class="schWoOpt" data-addworkout="'+o[1]+'">'+o[0]+'</button>').join('')+'</div>':'')+'</div>' : '';
+  const input='<div class="schInputRow"><input id="schInput" class="schInput" placeholder="e.g. school 10-2, gym 1930 hard" autocomplete="off"><button class="schAdd" data-addsched="1">＋ Add</button></div><div class="schHint">give every task a time — e.g. <b>school 10-2</b> · <b>gym 1930 hard</b> · <b>claude 9-11</b>. “10-2” means 10am–2pm. easy/medium/hard = color · drag a pill to move it <span style="opacity:.6">· build '+SCHED_SEED+'</span></div>'+themeBlock;
+  const wOut = '';   // no auto-add workout nudge — every task is typed with a time
   const row = tasks.length ? '<div class="schRow">'+tasks.map(t=>{ const time = t.gap ? (t.rStart!=null?clockOf(t.rStart)+'–'+clockOf(t.rEnd):(t.size==='small'?'small gaps':'fills day')) : clockOf(t.start);
       const armed=(!t.gap && schSel.indexOf(t.id)>=0)?' sel':''; const armAttr=t.gap?'':' data-armchip="'+t.id+'"';
       return '<span class="schChip'+(t.gap?' gapChip':'')+armed+'"'+armAttr+' style="--dc:'+diffColor(t.diff)+'"><b>'+esc(t.label)+'</b><span class="schChipTime">'+time+'</span>'+(!t.gap&&!t.explicit?'<span class="schGap" data-gaptask="'+t.id+'" title="Re-slot to best free time">↻</span>':'')+'<span class="schX" data-rmsched="'+t.id+'">×</span></span>'; }).join('')+'</div>' : '';
@@ -1116,7 +1299,7 @@ function scheduleHtml(){
   if(cur){ nowBlock='<div class="schNow"><div class="schNowTag" style="color:'+diffColor(cur.diff)+'">● Now · running</div><div class="schNowLabel">'+esc(cur.label)+'</div><div class="schNowTime">'+fmtRange(cur.start,cur.end)+'</div><div class="schCount">ends in <b class="cdVal" data-countdown="'+tToMsToday(cur.end)+'"></b></div>'+(nxt?'<div class="schNext"><span class="schNextDot"></span>Up next · <b>'+esc(nxt.label)+'</b> · '+clockOf(nxt.start)+'</div>':'')+'</div>'; }
   else if(nxt){ nowBlock='<div class="schNow"><div class="schNowTag">○ Free time</div><div class="schNowLabel">Free until '+clockOf(nxt.start)+'</div><div class="schCount"><b class="cdVal" data-countdown="'+tToMsToday(nxt.start)+'"></b> until '+esc(nxt.label)+'</div></div>'; }
   else { nowBlock='<div class="schNow"><div class="schNowTag">○ Free time</div><div class="schNowLabel">Nothing scheduled</div><div class="schCount"><b class="cdVal" data-countdown="'+bedCountdownMs()+'"></b> until bedtime</div></div>'; }
-  const _g=schGapWindow(); let _banner='';
+  const _g=schGapWindow(); let _banner=''; if(schErr) _banner='<div class="schBanner warn">! '+esc(schErr)+'</div>';
   if(_g){ _banner = (_g.hi>_g.lo+0.05)
     ? '<div class="schBanner">↳ '+clockOf(_g.lo)+'–'+clockOf(_g.hi)+(_g.free?' free window':(' between '+esc(_g.first.label)+' & '+esc(_g.second.label)))+' — type a task (“fill” = whole gap · “sleep 2h” = sized)</div>'
     : '<div class="schBanner warn">⚠ no gap there (tasks touch/overlap)</div>'; }
@@ -1155,35 +1338,65 @@ function smoothPath(pts){
   for(let i=1;i<pts.length;i++){ const p0=pts[i-1],p1=pts[i]; const cx=(p0[0]+p1[0])/2; d+=' C'+cx.toFixed(1)+' '+p0[1].toFixed(1)+' '+cx.toFixed(1)+' '+p1[1].toFixed(1)+' '+p1[0].toFixed(1)+' '+p1[1].toFixed(1); }
   return d;
 }
+// stepped path (Graph Lab "stepped area" look): hold each level, then step to the next
+function stepPath(pts){ if(!pts.length)return ''; let d='M'+pts[0][0].toFixed(1)+' '+pts[0][1].toFixed(1);
+  for(let i=1;i<pts.length;i++){ d+=' L'+pts[i][0].toFixed(1)+' '+pts[i-1][1].toFixed(1)+' L'+pts[i][0].toFixed(1)+' '+pts[i][1].toFixed(1); } return d; }
 function gridLines(){ let g=''; for(let i=1;i<=3;i++){ const y=PADT+(i/4)*(CH-PADT-PADB); g+='<line x1="0" y1="'+y.toFixed(1)+'" x2="'+CW+'" y2="'+y.toFixed(1)+'" stroke="rgba(255,255,255,.05)" stroke-dasharray="2 5"/>'; } return g; }
 function nowMarker(){ const t=nowT(); const x=xOf(t); return '<line x1="'+x.toFixed(1)+'" y1="0" x2="'+x.toFixed(1)+'" y2="'+(CH-PADB)+'" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 4"/>'; }
-function sleepMarkers(){ const {bed,wake}=optimalSleep();
-  const line=(t,col)=>{ const x=xOf(t); return '<line x1="'+x.toFixed(1)+'" y1="0" x2="'+x.toFixed(1)+'" y2="'+(CH-PADB)+'" stroke="'+col+'" stroke-width="1.2" stroke-dasharray="1 5" opacity=".6"/>'; };
-  return line(bed,'#6EE7B7')+line(wake,'#FBBF24'); }
+/* sleep window as a transparent, dashed-bordered ZONE — "you should be asleep here".
+ * It wraps midnight, so it's two bands: 12A→wake and bed→12A. */
+/* the sleep band(s) on the 0–24 axis. If bed is in the evening (bed>wake) it
+ * wraps midnight → two bands [0,wake] + [bed,24]. If you go to bed AFTER midnight
+ * (bed<wake, e.g. 12:30am) it's a single early-morning band [bed,wake] — no wrap,
+ * so we don't shade the whole day. */
+function sleepSegments(){ const {bed,wake}=planSleep(); const segs=[];
+  if(bed < wake-1e-6){ if(wake-bed>0.05) segs.push([bed,wake]); }
+  else { if(wake>0.05) segs.push([0,wake]); if(24-bed>0.05) segs.push([bed,24]); }
+  return segs; }
+function sleepMarkers(){ const zone=(a,b)=>{ const X=xOf(a), W=xOf(b)-xOf(a);
+    return '<rect x="'+X.toFixed(1)+'" y="0" width="'+W.toFixed(1)+'" height="'+(CH-PADB)+'" fill="rgba(110,231,183,.045)" stroke="rgba(110,231,183,.4)" stroke-width="1.2" stroke-dasharray="5 5" rx="4"/>'; };
+  return sleepSegments().map(s=>zone(s[0],s[1])).join(''); }
+/* "sleep here / wake here" labels sitting on the sleep-zone edges */
+function sleepLabelsHtml(){ const {wake}=planSleep(); let h='';
+  sleepSegments().forEach(s=>{ if(s[1]-s[0]>1.2){ const c=clamp((s[0]+s[1])/2/24*100,7,93); h+='<div class="sleepLbl" style="left:'+c.toFixed(1)+'%">☾ sleep</div>'; } });
+  h+='<div class="sleepLbl wake" style="left:'+clamp(wake/24*100,4,96).toFixed(1)+'%">☀ wake '+clockOf(wake)+'</div>';
+  return h; }
+/* invisible hover targets over the sleep zone — hovering reveals an "edit" button */
+function sleepHitHtml(){ const z=(a,b)=>{ const L=(a/24*100), W=((b-a)/24*100); return '<div class="sleepHit" style="left:'+L.toFixed(2)+'%;width:'+W.toFixed(2)+'%"></div>'; };
+  return sleepSegments().map(s=>z(s[0],s[1])).join('')+'<button id="sleepEditBtn" class="sleepEditBtn" data-sleepedit="1" style="display:none">✎ Edit wake &amp; sleep time</button>'; }
+function bindSleepEdit(){ const wrap=document.getElementById('chartWrap'); if(!wrap)return; const btn=document.getElementById('sleepEditBtn'); const hits=wrap.querySelectorAll('.sleepHit'); if(!btn||!hits.length)return; let hideT;
+  const show=hitEl=>{ clearTimeout(hideT); const wr=wrap.getBoundingClientRect(), hr=hitEl.getBoundingClientRect(); btn.style.display='block'; let x=(hr.left+hr.right)/2-wr.left; x=clamp(x, btn.offsetWidth/2+8, wr.width-btn.offsetWidth/2-8); btn.style.left=x.toFixed(0)+'px'; };
+  const hide=()=>{ hideT=setTimeout(()=>{ btn.style.display='none'; },160); };
+  hits.forEach(h=>{ h.addEventListener('pointerenter',()=>show(h)); h.addEventListener('pointerleave',hide); });
+  btn.addEventListener('pointerenter',()=>clearTimeout(hideT)); btn.addEventListener('pointerleave',hide); }
 function chartSvg(){
-  const gc=graphColor(), gcShadow=toRGBA(gc,.7);   // energy-curve color follows the theme accent
+  const G=graphStyle();                              // imported Graph Lab design (or shipped default)
+  const gc=G.color, lw=G.line;
+  const glowS=G.glow?(' style="filter:drop-shadow(0 0 6px '+toRGBA(gc,.85)+')"'):'';
+  const stepped=/step/.test(G.variant), dotted=/dot|dash/.test(G.variant), noArea=/line only|sparkline/.test(G.variant);
+  const areaFill=G.heightColor?'url(#hgrad)':'url(#area)';
   const defs='<defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+gc+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+gc+'" stop-opacity="0"/></linearGradient>'
-    +'<linearGradient id="caf" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FBBF24" stop-opacity=".4"/><stop offset="100%" stop-color="#FBBF24" stop-opacity=".02"/></linearGradient></defs>';
+    +'<linearGradient id="caf" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FBBF24" stop-opacity=".4"/><stop offset="100%" stop-color="#FBBF24" stop-opacity=".02"/></linearGradient>'
+    +'<linearGradient id="hgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+G.hiC+'" stop-opacity=".55"/><stop offset="55%" stop-color="#C8A24B" stop-opacity=".2"/><stop offset="100%" stop-color="'+G.loC+'" stop-opacity=".16"/></linearGradient></defs>';
   let body='';
   if(chartType==='bars'){
     const n=24, bw=CW/n*0.62;
     for(let h=0;h<n;h++){ const v=energyAt(h+0.5).e; const x=xOf(h+0.5)-bw/2, y=yOf(v); const isNow=Math.floor(nowT())===h;
       body+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(CH-PADB-y).toFixed(1)+'" rx="3" fill="'+(isNow?'#FBBF24':gc)+'" opacity="'+(isNow?'.9':'.55')+'"/>'; }
   } else if(chartType==='stack'){
-    // base = your energy without caffeine (theme color); total line = with caffeine (amber).
-    // Caffeine can now go negative (the crash), so we just draw both lines + base area.
+    // base = your energy without caffeine; total line = with caffeine (amber).
     const baseP=CURVE.map(p=>[xOf(p.t),yOf(p.base)]);
     const totP=CURVE.map(p=>[xOf(p.t),yOf(p.e)]);
-    const baseLine=smoothPath(baseP);
-    const totLine=smoothPath(totP);
+    const baseLine=smoothPath(baseP), totLine=smoothPath(totP);
     body+='<path d="'+baseLine+' L'+CW+' '+(CH-PADB)+' L0 '+(CH-PADB)+' Z" fill="url(#area)"/>';
     body+='<path d="'+baseLine+'" fill="none" stroke="'+gc+'" stroke-width="2" stroke-dasharray="4 4" opacity=".8" style="filter:drop-shadow(0 0 3px '+toRGBA(gc,.5)+')"/>';
     body+='<path d="'+totLine+'" fill="none" stroke="#FBBF24" stroke-width="2.2" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(251,191,36,.6))"/>';
   } else {
+    // LINE view — color/width/glow/stepped/dotted/height-color all from the graph style
     const pts=CURVE.map(p=>[xOf(p.t),yOf(p.e)]);
-    const line=smoothPath(pts);
-    body+='<path d="'+line+' L'+CW+' '+(CH-PADB)+' L0 '+(CH-PADB)+' Z" fill="url(#area)"/>';
-    body+='<path d="'+line+'" fill="none" stroke="'+gc+'" stroke-width="2.4" stroke-linecap="round" style="filter:drop-shadow(0 0 5px '+gcShadow+')"/>';
+    const dpath=stepped?stepPath(pts):smoothPath(pts);
+    if(!noArea) body+='<path d="'+dpath+' L'+CW+' '+(CH-PADB)+' L0 '+(CH-PADB)+' Z" fill="'+areaFill+'"/>';
+    body+='<path d="'+dpath+'" fill="none" stroke="'+gc+'" stroke-width="'+lw+'" '+(dotted?'stroke-dasharray="1 9" ':'')+'stroke-linejoin="round" stroke-linecap="round"'+glowS+'/>';
   }
   // peak marker dot
   let pk='';
@@ -1412,7 +1625,7 @@ function render(){
 
   const head='<div class="top">'+gem
     +'<div class="hgroup"><h1 class="htitle"><span class="maskLine"><span class="lineInner'+(titleRevealed?'':' reveal')+'">Your <em>peak</em> today</span></span></h1><p class="hdate">'+esc(dateStr)+'</p></div>'
-    +'</div>';
+    +'<a class="backLink" href="index.html">← Dashboard</a></div>';
   titleRevealed=true; // subsequent re-renders show the title static (no re-flip)
 
   const srcRow='<div class="srcRow"><span class="srcLab">Source</span>'+pill('manual','Manual')+pill('whoop','Whoop')+pill('apple','Apple Watch')+'</div>';
@@ -1461,8 +1674,10 @@ function render(){
   const peakRing='<div class="peakRing"><svg viewBox="0 0 84 84"><circle class="tr" cx="42" cy="42" r="38"/>'
     +'<circle class="fl" id="peakFill" cx="42" cy="42" r="38" style="stroke-dasharray:'+c2+';stroke-dashoffset:'+(c2*(1-PEAK.e/100))+'"/></svg>'
     +'<div class="peakNum" id="peakNum">'+Math.round(PEAK.e)+'</div></div>';
-  const sp=optimalSleep();
-  const sleepPlan='<div class="sleepPlan"><span class="spItem">🌙 Bed <b>'+clockOf(sp.bed)+'</b></span><span class="spDot">·</span><span class="spItem">☀️ Wake <b>'+clockOf(sp.wake)+'</b></span><span class="spNote"><b class="cdVal" data-countdown="'+bedCountdownMs()+'" style="color:var(--accent2)"></b> to bed · '+sp.need+'h target</span></div>';
+  const sp=planSleep();
+  const sleepPlan = hasWakeBedData()
+    ? '<div class="sleepPlan" data-sleepedit="1" style="cursor:pointer"><span class="spItem">🌙 Bed <b>'+clockOf(sp.bed)+'</b></span><span class="spDot">·</span><span class="spItem">☀️ Wake <b>'+clockOf(sp.wake)+'</b></span><span class="spNote"><b class="cdVal" data-countdown="'+bedCountdownMs()+'" style="color:var(--accent2)"></b> to bed · tap to edit</span></div>'
+    : '<div class="sleepPlan" data-sleepedit="1" style="cursor:pointer;border-color:rgba(245,158,11,.4)"><span class="spItem" style="color:var(--warn)">⚠ Set your wake &amp; sleep time</span><span class="spNote">tap to add when you woke + when you’ll sleep</span></div>';
   const cc=caffeineCrash(), mc=medCrash();
   let crashLabels='';
   if(cc) crashLabels+='<div class="crashMark" style="left:'+clamp(cc.t/24*100,6,94)+'%">☕ crash '+clockOf(cc.t)+'</div>';
@@ -1472,11 +1687,12 @@ function render(){
     +'<p class="curveDesc">'+curveStatusHtml()+'</p></div>'
     +'<div class="seg">'+['line','bars','stack'].map(t=>'<button class="segBtn '+(chartType===t?'on':'')+'" data-chart="'+t+'">'+t+'</button>').join('')+'</div></div>'
     + feelBarHtml()
-    +'<div class="chartWrap" id="chartWrap">'+chartSvg()
-    +'<div class="sleepMarks"><div class="sleepMark" style="left:'+clamp(sp.wake/24*100,5,95)+'%">☀️ '+clockOf(sp.wake)+'</div></div>'
+    +'<div class="chartWrap" id="chartWrap">'+chartBackdropHtml()+chartSvg()
+    +'<div class="sleepLabels">'+sleepLabelsHtml()+'</div>'
+    +sleepHitHtml()+sleepEditPopHtml()
     +'<div class="schBands" id="schBands">'+schOverlayHtml()+'</div>'
     +'<div class="crashMarks">'+crashLabels+'</div>'
-    +'<div class="scrubLine" id="scrubLine"></div><div class="scrubDot" id="scrubDot"></div><div class="scrubTip" id="scrubTip"></div></div>'
+    +'<div class="scrubLine" id="scrubLine"></div><div class="scrubDot" id="scrubDot"></div><div class="scrubTip" id="scrubTip"></div><div class="dragTime" id="dragTime"></div></div>'
     +'<div class="xAxis">'+X_LABELS.map(l=>'<span>'+l+'</span>').join('')+'</div>'
     +'<div class="plan">'+planLaneHtml()+'</div>'
     +'</div>';
@@ -1491,7 +1707,7 @@ function render(){
 
   const footNote='<p class="footNote">Peak is a science-based estimate from your own data — not a medical measurement. It personalizes to you over ~30 days. Tap the “i” to see how it’s calculated. Meds are modeled for information only, never as dosing advice.</p>';
   document.getElementById('app').innerHTML=head+srcRow+topScore+mCard+tk+daySec+schedSec+nowSec+cafSec+medSec+waterSec+suppSec+footNote;
-  bindScrub(); bindFeel(); bindCaf(); bindMed(); bindSched(); bindTaskDrag(); layoutSchedPills(); tickCountdowns();
+  bindScrub(); bindFeel(); bindCaf(); bindMed(); bindSched(); bindTaskDrag(); bindSleepEdit(); layoutSchedPills(); tickCountdowns();
 }
 function feelBarHtml(){
   const f=latestFeelToday(); const val=f!=null?f:Math.round(energyAt(nowT()).e);
@@ -1524,7 +1740,7 @@ function caffeineCardHtml(){
     + searchBlock
     + caffLogsHtml()
     +'<div class="cafTip'+(tip.warn?' warn':'')+'"><span class="cafTipIcon">'+tip.icon+'</span><span class="cafTipTxt">'+tip.txt+'</span></div>'
-    +''
+    +'<a class="trackLink" href="stimulant.html">Open Caffeine tracker →</a>'
     +'</div>';
 }
 function caffLogsHtml(){
@@ -1682,6 +1898,12 @@ document.addEventListener('click',e=>{
   const aw=e.target.closest('[data-addworkout]'); if(aw){ workoutOpen=false; addWorkout(parseFloat(aw.dataset.addworkout)); return; }
   if(e.target.closest('[data-plantoggle]')){ planOpen=!planOpen; render(); return; }
   if(e.target.closest('[data-planadd]')){ const el=document.getElementById('schInput'); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.focus(); } return; }
+  if(e.target.closest('[data-sleepedit]')){ openSleepEdit(); return; }
+  if(e.target.closest('[data-sleepcancel]')){ sleepEditOpen=false; render(); return; }
+  const sadj=e.target.closest('[data-sleepadj]'); if(sadj){ const p=sadj.dataset.sleepadj.split(':'); const step=0.25*(+p[1]);
+    if(p[0]==='Wake'){ sleepEditWake=((sleepEditWake+step)%24+24)%24; const el=document.getElementById('sleepWakeDisp'); if(el)el.textContent=clockOf(sleepEditWake); }
+    else { sleepEditBed=((sleepEditBed+step)%24+24)%24; const el=document.getElementById('sleepBedDisp'); if(el)el.textContent=clockOf(sleepEditBed); } return; }
+  if(e.target.closest('[data-sleepsave]')){ saveSleepTimes(floatTo24(sleepEditWake), floatTo24(sleepEditBed)); return; }
   const pb=e.target.closest('[data-pulse]'); if(pb){ startPulse(parseInt(pb.dataset.pulse,10)||30); return; }
   const rm=e.target.closest('[data-rmcaf]'); if(rm){ removeCaffLog(rm.dataset.rmcaf); return; }
   const cc=e.target.closest('[data-clearcaf]'); if(cc){ if(confirm('Clear all of today’s caffeine?')) clearCaffToday(); return; }
@@ -1705,7 +1927,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#infoBtn')){ infoOpen=!infoOpen; render(); return; }
   // click a free stretch of the chart to arm that window (or a task to arm it)
   const cwrap=e.target.closest('#chartWrap');
-  if(cwrap && !e.target.closest('.taskMark') && !e.target.closest('.plan')){
+  if(cwrap && !e.target.closest('.taskMark') && !e.target.closest('.plan') && !e.target.closest('.sleepHit') && !e.target.closest('.sleepEditBtn') && !e.target.closest('.sleepEditPop')){
     const r=cwrap.getBoundingClientRect(); const hour=clamp((e.clientX-r.left)/r.width,0,1)*24; schArmHour(hour); return;
   }
 });
@@ -1735,7 +1957,21 @@ setInterval(tickCountdowns, 1000); // live countdowns (now-running / free / bedt
 }catch(e){} })();
 </script>
 <script>
-/* brand.js (inlined for standalone) — swaps the baked "Liam" wordmark for the saved profile name. */
+/* brand.js (inlined for standalone) */
+/* ============================================================
+ * brand.js — the suite wordmark = the CURRENT USER'S name.
+ *
+ * Every page ships with the literal wordmark "Liam" (titles, the
+ * "← back" links, the live tickers, aria-labels). This swaps that
+ * wordmark for the name saved in the onboarding profile
+ * (patron_profile_v1), falling back to "Dashboard" until one is set.
+ *
+ * It runs on load AND re-applies after the page's own JS re-renders
+ * (via a MutationObserver), so JS-built markup stays branded too.
+ * If the user's name actually IS "Liam", it's a no-op.
+ *
+ * Include once per page, anywhere after <body> opens (we add it last).
+ * ============================================================ */
 (function () {
   var WORDMARK = 'Liam'; // the literal baked into every page's markup
   function brand() {
@@ -1797,6 +2033,5 @@ setInterval(tickCountdowns, 1000); // live countdowns (now-running / free / bedt
   });
 })();
 </script>
-
 </body>
 </html>
